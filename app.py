@@ -1,3 +1,4 @@
+%%writefile satdat_app/app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,7 +9,7 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score, davies_bouldin_score
 from sklearn.decomposition import PCA
-import warnings, os
+import warnings
 warnings.filterwarnings("ignore")
 
 st.set_page_config(
@@ -22,36 +23,66 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* Background dark mode */
 .stApp { background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); }
+
+/* Background light mode */
+[data-theme="light"] .stApp {
+    background: linear-gradient(160deg, #f0f4ff 0%, #e8eaf6 50%, #f0f4ff 100%) !important;
+}
+
+/* Hero selalu pakai warna gelap — aman di kedua mode */
 .hero {
     background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 50%, #7c3aed 100%);
     border-radius: 24px; padding: 2.8rem 2.5rem; margin-bottom: 1.8rem;
     box-shadow: 0 0 60px rgba(124,58,237,0.3);
     border: 1px solid rgba(255,255,255,0.1);
 }
-.hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0; color: white; }
-.hero p  { font-size: 1rem; color: #bfdbfe; margin: .6rem 0 0; }
+.hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0; color: white !important; }
+.hero p  { font-size: 1rem; color: #bfdbfe !important; margin: .6rem 0 0; }
+
+/* Card dark */
 .card {
     background: rgba(30,27,75,0.7); border-radius: 20px; padding: 1.6rem;
     border: 1px solid rgba(124,58,237,0.2);
     box-shadow: 0 8px 32px rgba(0,0,0,0.4); margin-bottom: 1rem;
 }
-.card h3 { font-weight: 700; margin: 0 0 1rem; font-size: 1.05rem; color: #a5b4fc; }
+.card h3 { font-weight: 700; margin: 0 0 1rem; font-size: 1.05rem; color: #a5b4fc !important; }
+
+/* Card light */
+[data-theme="light"] .card {
+    background: rgba(255,255,255,0.9) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] .card h3 { color: #4f46e5 !important; }
+
+/* Metric box */
 .metric-box {
     background: linear-gradient(135deg, rgba(30,27,75,0.9), rgba(49,46,129,0.9));
     border-radius: 18px; padding: 1.4rem; text-align: center;
     border: 1px solid rgba(124,58,237,0.3);
 }
-.metric-box .val { font-size: 2rem; font-weight: 800; color: #a5b4fc; }
-.metric-box .lbl { font-size: .72rem; color: #94a3b8; font-weight: 600;
+.metric-box .val { font-size: 2rem; font-weight: 800; color: #a5b4fc !important; }
+.metric-box .lbl { font-size: .72rem; color: #94a3b8 !important; font-weight: 600;
                    text-transform: uppercase; letter-spacing: 1.2px; margin-top: .4rem; }
+
+/* Metric box light */
+[data-theme="light"] .metric-box {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe) !important;
+    border: 1px solid rgba(99,102,241,0.3) !important;
+}
+[data-theme="light"] .metric-box .val { color: #4f46e5 !important; }
+[data-theme="light"] .metric-box .lbl { color: #6b7280 !important; }
+
+/* Aspek card */
 .aspek-card {
     border-radius: 16px; padding: 1.2rem 1.4rem; margin-bottom: .8rem;
     border-left: 5px solid; font-size: .95rem;
 }
-.aspek-title { font-weight: 800; font-size: 1rem; margin-bottom: .4rem; }
-.aspek-val   { font-size: 1.5rem; font-weight: 700; }
-.aspek-desc  { font-size: .82rem; color: #cbd5e1; margin-top: .3rem; }
+
+/* Sidebar selalu gelap */
 div[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%) !important;
 }
@@ -60,71 +91,44 @@ div[data-testid="stSidebar"] span,
 div[data-testid="stSidebar"] label { color: #c7d2fe !important; }
 div[data-testid="stSidebar"] h2,
 div[data-testid="stSidebar"] h3 { color: #a5b4fc !important; }
+
+/* Button */
 div[data-testid="stButton"] > button {
     background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
     color: white !important; border: none !important;
     border-radius: 14px !important; font-weight: 700 !important;
     width: 100% !important;
 }
-p, span, li { color: #e2e8f0 !important; }
-h1, h2, h3, h4 { color: #f1f5f9 !important; }
-.stTabs [data-baseweb="tab"] { color: #94a3b8 !important; }
-.stTabs [aria-selected="true"] { color: #a5b4fc !important; border-bottom-color: #a5b4fc !important; }
+
+/* Teks umum: dark mode */
+.stApp p, .stApp span, .stApp li { color: #e2e8f0; }
+.stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #f1f5f9; }
+
+/* Teks umum: light mode */
+[data-theme="light"] .stApp p,
+[data-theme="light"] .stApp span,
+[data-theme="light"] .stApp li  { color: #1e293b !important; }
+[data-theme="light"] .stApp h1,
+[data-theme="light"] .stApp h2,
+[data-theme="light"] .stApp h3,
+[data-theme="light"] .stApp h4  { color: #0f172a !important; }
+
+/* Hero teks tetap terang */
+.hero p, .hero span, .hero li { color: #bfdbfe !important; }
+.hero h1, .hero h2, .hero h3  { color: white !important; }
+
+/* Tabs */
+.stTabs [data-baseweb="tab"] { color: #94a3b8; }
+.stTabs [aria-selected="true"] { color: #6366f1 !important; border-bottom-color: #6366f1 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+# ── LOAD DATA ────────────────────────────────────────────────────────────────
 
 @st.cache_data
 def load_data():
-    # Cari file Excel dari berbagai kemungkinan lokasi
-    search_dirs = [
-        os.path.join(BASE, 'data'),   # ./data/
-        BASE,                          # root repo
-        os.path.join(BASE, '..'),      # parent folder
-        '/mount/src',                  # Streamlit Cloud mount root
-    ]
-
-    candidates = []
-    for d in search_dirs:
-        if os.path.exists(d):
-            for f in os.listdir(d):
-                if f.lower().endswith(('.xlsx', '.xls')) and not f.startswith('~'):
-                    candidates.append(os.path.join(d, f))
-
-    if not candidates:
-        # Tampilkan info debug yang membantu
-        st.error("❌ File Excel tidak ditemukan!")
-        st.markdown("**Debug info:**")
-        st.code(f"BASE path: {BASE}\nSearched dirs: {search_dirs}")
-        for d in search_dirs:
-            if os.path.exists(d):
-                try:
-                    contents = os.listdir(d)
-                    st.code(f"{d}:\n" + "\n".join(contents[:20]))
-                except Exception as e:
-                    st.code(f"{d}: ERROR - {e}")
-        st.markdown("""
-**Solusi:** Pastikan file Excel sudah di-upload ke folder `data/` di dalam repository GitHub kamu.
-
-Struktur yang benar:
-```
-repo/
-├── app.py
-├── requirements.txt
-└── data/
-    └── nama_file_kamu.xlsx
-```
-        """)
-        st.stop()
-
-    path = candidates[0]
-    try:
-        df = pd.read_excel(path, sheet_name='Sheet1')
-    except Exception:
-        df = pd.read_excel(path, sheet_name=0)
-    df = df.fillna(df.median(numeric_only=True))
-    return df
+    df = pd.read_excel('ketahanan pangan 2025.xlx', sheet_name=0, engine='openpyxl')
+    return df.fillna(df.median(numeric_only=True))
 
 df = load_data()
 
@@ -144,48 +148,39 @@ FEATURE_LABELS = {
     'Curah hujan (mm/hari)': 'Curah Hujan / X7 (mm/hari)',
     'Kecepatan angin pada ketinggian 2 meter (m/s)': 'Kecepatan Angin / X8 (m/s)',
 }
-
 ASPEK = {
     'Ketersediaan': {
         'cols': ['Produksi Padi', 'produksi jagung'],
-        'color': '#34d399',
-        'bg': 'rgba(52,211,153,0.08)',
-        'border': '#34d399',
-        'icon': 'X1 & X2',
-        'desc': 'Produksi Padi (X1) + Produksi Jagung (X2)',
+        'color': '#34d399', 'bg': 'rgba(52,211,153,0.08)', 'border': '#34d399',
+        'icon': 'X1 & X2', 'desc': 'Produksi Padi (X1) + Produksi Jagung (X2)',
     },
     'Aksesibilitas': {
         'cols': ['PDRB ADHB', 'harga beras'],
-        'color': '#60a5fa',
-        'bg': 'rgba(96,165,250,0.08)',
-        'border': '#60a5fa',
-        'icon': 'X3 & X4',
-        'desc': 'PDRB/Pendapatan Per Kapita (X3) + Harga Beras (X4)',
+        'color': '#60a5fa', 'bg': 'rgba(96,165,250,0.08)', 'border': '#60a5fa',
+        'icon': 'X3 & X4', 'desc': 'PDRB/Pendapatan Per Kapita (X3) + Harga Beras (X4)',
     },
     'Pemanfaatan': {
         'cols': ['akses sanitasi layak', 'akses air minum layak'],
-        'color': '#f472b6',
-        'bg': 'rgba(244,114,182,0.08)',
-        'border': '#f472b6',
-        'icon': 'X5 & X6',
-        'desc': 'Akses Sanitasi Layak (X5) + Akses Air Minum Layak (X6)',
+        'color': '#f472b6', 'bg': 'rgba(244,114,182,0.08)', 'border': '#f472b6',
+        'icon': 'X5 & X6', 'desc': 'Akses Sanitasi Layak (X5) + Akses Air Minum Layak (X6)',
     },
     'Stabilitas': {
         'cols': ['Curah hujan (mm/hari)', 'Kecepatan angin pada ketinggian 2 meter (m/s)'],
-        'color': '#fb923c',
-        'bg': 'rgba(251,146,60,0.08)',
-        'border': '#fb923c',
-        'icon': 'X7 & X8',
-        'desc': 'Curah Hujan (X7) + Kecepatan Angin (X8)',
+        'color': '#fb923c', 'bg': 'rgba(251,146,60,0.08)', 'border': '#fb923c',
+        'icon': 'X7 & X8', 'desc': 'Curah Hujan (X7) + Kecepatan Angin (X8)',
     },
 }
-
 PALETTE = ['#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa','#fbbf24','#f87171','#22d3ee']
+
+# Plotly: transparan agar ikut background halaman, font netral
 PLOT_THEME = dict(
-    plot_bgcolor='rgba(15,23,42,0.8)', paper_bgcolor='rgba(15,23,42,0)',
-    font=dict(color='#e2e8f0')
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#6366f1'),
 )
 PLOT_MARGIN = dict(t=40, b=20, l=20, r=20)
+
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
     st.markdown("## SatDat Dashboard")
@@ -205,6 +200,8 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Metode:** t-SNE + DBSCAN")
     st.markdown("**Provinsi:** 38")
+
+# ── KOMPUTASI ─────────────────────────────────────────────────────────────────
 
 X = df[FEATURE_COLS].values
 scaler = StandardScaler()
@@ -244,7 +241,7 @@ unique_labels = sorted(df['Cluster_DBSCAN'].unique())
 color_map = {}
 for i, lbl in enumerate(unique_labels):
     key = 'Noise (-1)' if lbl == -1 else f'Klaster {lbl+1}'
-    color_map[key] = '#64748b' if lbl == -1 else PALETTE[i % len(PALETTE)]
+    color_map[key] = '#94a3b8' if lbl == -1 else PALETTE[i % len(PALETTE)]
 
 def level_label(val, col, thresholds=(33, 66)):
     arr = df[col].dropna()
@@ -288,8 +285,8 @@ if page == "Beranda":
         fig = px.scatter(df, x='TSNE_1', y='TSNE_2', color='Cluster_Label',
                          color_discrete_map=color_map, hover_name='PROVINSI',
                          title='Peta t-SNE - Klaster DBSCAN')
-        fig.update_traces(marker=dict(size=12, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=380, legend=dict(font=dict(color='#ccc')))
+        fig.update_traces(marker=dict(size=12, line=dict(width=1.5, color='rgba(255,255,255,0.5)')))
+        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=380)
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="card"><h3>Preview Dataset</h3>', unsafe_allow_html=True)
@@ -353,7 +350,7 @@ elif page == "Eksplorasi Data":
         fig = go.Figure(go.Bar(x=df_s['PROVINSI'], y=df_s[sort_by],
                                marker=dict(color=df_s[sort_by], colorscale='Plasma'),
                                text=[f"{v:.2f}" for v in df_s[sort_by]],
-                               textposition='outside', textfont=dict(color='white')))
+                               textposition='outside'))
         fig.update_layout(title=f'Top {top_n} - {FEATURE_LABELS.get(sort_by)}',
                           xaxis_tickangle=-40, **PLOT_THEME, margin=PLOT_MARGIN, height=430)
         st.plotly_chart(fig, use_container_width=True)
@@ -383,30 +380,24 @@ elif page == "Klasterisasi DBSCAN":
         fig = px.scatter(df, x=x_ax, y=y_ax, color='Cluster_Label', color_discrete_map=color_map,
                          hover_name='PROVINSI',
                          title=f'DBSCAN - {FEATURE_LABELS.get(x_ax)} vs {FEATURE_LABELS.get(y_ax)}')
-        fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=480, legend=dict(font=dict(color='#ccc')))
+        fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='rgba(255,255,255,0.5)')))
+        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=480)
         st.plotly_chart(fig, use_container_width=True)
 
         fig2 = px.scatter(df, x='PCA_1', y='PCA_2', color='Cluster_Label', color_discrete_map=color_map,
                           hover_name='PROVINSI', title='DBSCAN pada Ruang PCA 2D')
-        fig2.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')))
+        fig2.update_traces(marker=dict(size=14, line=dict(width=1.5, color='rgba(255,255,255,0.5)')))
         fig2.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=450,
                            xaxis_title=f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)',
-                           yaxis_title=f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)',
-                           legend=dict(font=dict(color='#ccc')))
+                           yaxis_title=f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab2:
         fig3 = px.scatter_3d(df, x='PCA_1', y='PCA_2', z='PCA_3', color='Cluster_Label',
                              color_discrete_map=color_map, hover_name='PROVINSI',
                              hover_data={'IKP':':.2f'}, title='Visualisasi 3D DBSCAN (PCA)', height=600)
-        fig3.update_traces(marker=dict(size=8, line=dict(width=0.5, color='white')))
-        fig3.update_layout(**PLOT_THEME, margin=PLOT_MARGIN,
-                           scene=dict(bgcolor='rgba(15,23,42,0.8)',
-                                      xaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                                      yaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                                      zaxis=dict(gridcolor='#334155', color='#94a3b8')),
-                           legend=dict(font=dict(color='#ccc')))
+        fig3.update_traces(marker=dict(size=8, line=dict(width=0.5, color='rgba(255,255,255,0.3)')))
+        fig3.update_layout(**PLOT_THEME, margin=PLOT_MARGIN)
         st.plotly_chart(fig3, use_container_width=True)
 
         st.markdown('<div class="card"><h3>Explained Variance PCA</h3>', unsafe_allow_html=True)
@@ -414,7 +405,7 @@ elif page == "Klasterisasi DBSCAN":
                                   y=pca.explained_variance_ratio_*100,
                                   marker_color=['#818cf8','#a78bfa','#c4b5fd'],
                                   text=[f'{v:.1f}%' for v in pca.explained_variance_ratio_*100],
-                                  textposition='outside', textfont=dict(color='white')))
+                                  textposition='outside'))
         fig_p.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=300, title='Variance per Komponen PCA')
         st.plotly_chart(fig_p, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -423,7 +414,7 @@ elif page == "Klasterisasi DBSCAN":
         for cluster_id in sorted(df['Cluster_DBSCAN'].unique()):
             sub = df[df['Cluster_DBSCAN']==cluster_id]
             label = 'Noise (Outlier)' if cluster_id==-1 else f'Klaster {cluster_id+1}'
-            color = '#64748b' if cluster_id==-1 else PALETTE[cluster_id % len(PALETTE)]
+            color = '#94a3b8' if cluster_id==-1 else PALETTE[cluster_id % len(PALETTE)]
             with st.expander(f"{label} -- {len(sub)} Provinsi"):
                 show = sub[['PROVINSI','IKP','akses sanitasi layak','akses air minum layak','Produksi Padi','harga beras']].copy()
                 show.columns = ['Provinsi','IKP','Sanitasi (%)','Air Minum (%)','Prod. Padi','Harga Beras']
@@ -452,9 +443,9 @@ elif page == "Visualisasi t-SNE":
                              color_discrete_map=color_map, hover_name='PROVINSI',
                              hover_data={'TSNE_1':False,'TSNE_2':False,'IKP':':.2f'},
                              title=f't-SNE 2D - DBSCAN (perplexity={perplexity_val})', text='PROVINSI')
-            fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')),
-                              textposition='top center', textfont=dict(size=8, color='white'))
-            fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=550, legend=dict(font=dict(color='#ccc')))
+            fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='rgba(255,255,255,0.5)')),
+                              textposition='top center', textfont=dict(size=8))
+            fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=550)
             st.plotly_chart(fig, use_container_width=True)
         with c2:
             st.markdown('<div class="card"><h3>Legenda Klaster</h3>', unsafe_allow_html=True)
@@ -466,8 +457,8 @@ elif page == "Visualisasi t-SNE":
                     f'<div style="background:{clr}22;border-left:4px solid {clr};'
                     f'padding:.8rem;border-radius:8px;margin:.5rem 0;">'
                     f'<b style="color:{clr}">{lbl}</b><br>'
-                    f'<small style="color:#94a3b8">{len(members)} provinsi</small><br>'
-                    f'<small style="color:#cbd5e1">{", ".join(members[:5])}{"..." if len(members)>5 else ""}</small>'
+                    f'<small>{len(members)} provinsi</small><br>'
+                    f'<small>{", ".join(members[:5])}{"..." if len(members)>5 else ""}</small>'
                     f'</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             if sil_score:
@@ -482,13 +473,13 @@ elif page == "Visualisasi t-SNE":
         fig = px.scatter(df, x='TSNE_1', y='TSNE_2', color=color_by, color_continuous_scale=cscale,
                          hover_name='PROVINSI', title=f't-SNE - {FEATURE_LABELS.get(color_by)}', text='PROVINSI')
         fig.update_traces(marker=dict(size=16, line=dict(width=1, color='rgba(255,255,255,0.3)')),
-                          textposition='top center', textfont=dict(size=8, color='white'))
+                          textposition='top center', textfont=dict(size=8))
         fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=550)
         st.plotly_chart(fig, use_container_width=True)
 
     with tab3:
         st.markdown('<div class="card"><h3>Apa itu t-SNE?</h3>', unsafe_allow_html=True)
-        st.markdown("""
+        st.markdown(f"""
 **t-SNE (t-Distributed Stochastic Neighbor Embedding)** adalah teknik reduksi dimensi non-linear
 yang sangat efektif untuk memvisualisasikan data berdimensi tinggi dalam 2D atau 3D.
 
@@ -497,14 +488,13 @@ yang sangat efektif untuk memvisualisasikan data berdimensi tinggi dalam 2D atau
 2. Memetakan ke dimensi rendah dengan mempertahankan struktur lokal
 3. Mengoptimalkan posisi agar kemiripan di dimensi rendah mirip dimensi tinggi
 
-**Parameter Penting:**
-- **Perplexity** – jumlah tetangga efektif yang dipertimbangkan (5–50)
-- **Max Iterasi** – lebih banyak iterasi = lebih stabil, tapi lebih lambat
+**Parameter aktif:**
+- Perplexity = `{perplexity_val}` (jumlah tetangga efektif; rekomendasi 5–30)
+- Max Iterasi = `{tsne_iter}` (lebih banyak = lebih stabil)
 
 **Interpretasi:**
-- Titik berdekatan = profil ketahanan pangan mirip
+- Titik berdekatan = provinsi dengan profil ketahanan pangan serupa
 - Klaster terpisah = kelompok provinsi dengan karakteristik berbeda
-- Titik berjauhan = profil berbeda signifikan
 - Jarak ANTAR klaster di t-SNE tidak bermakna langsung
         """)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -533,7 +523,7 @@ elif page == "Analisis Gabungan":
                                      y=means_df.loc[cl].values,
                                      marker_color=color_map.get(cl, PALETTE[i%len(PALETTE)])))
             fig.update_layout(barmode='group', title='Perbandingan Variabel Antar Klaster',
-                              **PLOT_THEME, margin=PLOT_MARGIN, height=450, xaxis_tickangle=-20, legend=dict(font=dict(color='#ccc')))
+                              **PLOT_THEME, margin=PLOT_MARGIN, height=450, xaxis_tickangle=-20)
             st.plotly_chart(fig, use_container_width=True)
 
     with tab2:
@@ -552,11 +542,10 @@ elif page == "Analisis Gabungan":
             fig_r.add_trace(go.Scatterpolar(r=vals, theta=categories+[categories[0]],
                                              fill='toself', name=cl, line_color=clr))
         fig_r.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
-                       angularaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                       bgcolor='rgba(15,23,42,0.6)'),
-            paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
-            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550, legend=dict(font=dict(color='#ccc')))
+            polar=dict(radialaxis=dict(visible=True, range=[0,1])),
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#6366f1'),
+            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550)
         st.plotly_chart(fig_r, use_container_width=True)
 
     with tab3:
@@ -564,17 +553,16 @@ elif page == "Analisis Gabungan":
         fig = go.Figure(go.Bar(x=df_ikp['IKP'], y=df_ikp['PROVINSI'], orientation='h',
                                marker=dict(color=df_ikp['IKP'], colorscale='RdYlGn'),
                                text=[f"{v:.2f}" for v in df_ikp['IKP']],
-                               textposition='outside', textfont=dict(color='white')))
+                               textposition='outside'))
         fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, title='Indeks Ketahanan Pangan per Provinsi',
                           height=1000, xaxis_title='IKP Score')
         st.plotly_chart(fig, use_container_width=True)
         ikp_cl = df.groupby('Cluster_Label')['IKP'].agg(['mean','min','max','count'])
         ikp_cl.columns = ['Rata-rata IKP','Min IKP','Max IKP','Jumlah Provinsi']
-        st.dataframe(ikp_cl.sort_values('Rata-rata IKP', ascending=False)
-                     .style.format(precision=3),
+        st.dataframe(ikp_cl.sort_values('Rata-rata IKP', ascending=False).style.format(precision=3),
                      use_container_width=True)
 
-# ════ KARAKTERISTIK KLASTER (4 ASPEK) ════
+# ════ KARAKTERISTIK KLASTER ════
 elif page == "Karakteristik Klaster":
     st.markdown("""<div class="hero">
         <h1>Karakteristik Klaster</h1>
@@ -590,8 +578,8 @@ elif page == "Karakteristik Klaster":
     <div style="background:{clr}18;border:2px solid {clr};border-radius:16px;
                 padding:1.2rem 1.6rem;margin-bottom:1.5rem;">
         <b style="color:{clr};font-size:1.2rem">{cluster_sel}</b>
-        <span style="color:#94a3b8;margin-left:1rem">{len(sub)} Provinsi</span><br>
-        <small style="color:#cbd5e1">{' · '.join(sub['PROVINSI'].tolist())}</small>
+        <span style="margin-left:1rem">{len(sub)} Provinsi</span><br>
+        <small>{' · '.join(sub['PROVINSI'].tolist())}</small>
     </div>
     """, unsafe_allow_html=True)
 
@@ -602,14 +590,13 @@ elif page == "Karakteristik Klaster":
         clr_a = aspek_info['color']
         bg_a  = aspek_info['bg']
         brd_a = aspek_info['border']
-
         cluster_vals = sub[cols_aspek].mean()
         global_vals  = df[cols_aspek].mean()
 
         st.markdown(f"""
         <div class="aspek-card" style="background:{bg_a};border-left-color:{brd_a};">
-            <div class="aspek-title" style="color:{clr_a}">
-                {aspek_name} &nbsp;<small style="font-weight:400;color:#94a3b8">({aspek_info['icon']}) — {aspek_info['desc']}</small>
+            <div style="font-weight:800;font-size:1rem;color:{clr_a}">
+                {aspek_name} &nbsp;<small style="font-weight:400">({aspek_info['icon']}) — {aspek_info['desc']}</small>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -620,17 +607,17 @@ elif page == "Karakteristik Klaster":
             g_val = global_vals[col_name]
             diff  = ((c_val - g_val) / g_val * 100) if g_val != 0 else 0
             lvl   = level_label(c_val, col_name)
-            lvl_color = '#34d399' if lvl=='Tinggi' else ('#fb923c' if lvl=='Sedang' else '#f87171')
+            lvl_color = '#16a34a' if lvl=='Tinggi' else ('#ea580c' if lvl=='Sedang' else '#dc2626')
             arrow = '▲' if diff > 0 else '▼'
-            arrow_color = '#34d399' if diff > 0 else '#f87171'
+            arrow_color = '#16a34a' if diff > 0 else '#dc2626'
 
             with metric_cols[idx*2]:
                 st.markdown(f"""
                 <div class="metric-box" style="border-color:{clr_a}44;">
-                    <div style="font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px">
+                    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px">
                         {FEATURE_LABELS.get(col_name, col_name)}
                     </div>
-                    <div class="val" style="color:{clr_a};margin:.4rem 0">{c_val:,.2f}</div>
+                    <div style="font-size:2rem;font-weight:800;color:{clr_a};margin:.4rem 0">{c_val:,.2f}</div>
                     <div style="font-size:.78rem;color:{lvl_color};font-weight:700">{lvl}</div>
                     <div style="font-size:.75rem;color:{arrow_color};margin-top:.2rem">
                         {arrow} {abs(diff):.1f}% vs rata-rata nasional
@@ -641,11 +628,11 @@ elif page == "Karakteristik Klaster":
             with metric_cols[idx*2 + 1]:
                 fig_mini = go.Figure()
                 fig_mini.add_trace(go.Bar(
-                    x=['Klaster ini', 'Rata-rata Nasional'],
+                    x=['Klaster ini', 'Nasional'],
                     y=[c_val, g_val],
-                    marker_color=[clr_a, '#475569'],
+                    marker_color=[clr_a, '#94a3b8'],
                     text=[f'{c_val:,.1f}', f'{g_val:,.1f}'],
-                    textposition='outside', textfont=dict(color='white', size=10),
+                    textposition='outside',
                 ))
                 fig_mini.update_layout(**PLOT_THEME, height=180, margin=dict(t=10,b=10,l=5,r=5),
                                        showlegend=False, yaxis=dict(visible=False),
@@ -661,14 +648,11 @@ elif page == "Karakteristik Klaster":
     norm_aspek_nasional = {}
     for aspek_name, aspek_info in ASPEK.items():
         cols_a = aspek_info['cols']
-        scores = []
-        scores_global = []
+        scores, scores_global = [], []
         for c in cols_a:
             mn, mx = df[c].min(), df[c].max()
-            norm_val = (sub[c].mean() - mn) / (mx - mn + 1e-9)
-            norm_glob = (df[c].mean() - mn) / (mx - mn + 1e-9)
-            scores.append(norm_val)
-            scores_global.append(norm_glob)
+            scores.append((sub[c].mean() - mn) / (mx - mn + 1e-9))
+            scores_global.append((df[c].mean() - mn) / (mx - mn + 1e-9))
         norm_aspek_cluster[aspek_name]  = np.mean(scores)
         norm_aspek_nasional[aspek_name] = np.mean(scores_global)
 
@@ -681,15 +665,14 @@ elif page == "Karakteristik Klaster":
     fig_radar.add_trace(go.Scatterpolar(r=vals_cl, theta=theta, fill='toself',
                                         name=cluster_sel, line_color=clr))
     fig_radar.add_trace(go.Scatterpolar(r=vals_nas, theta=theta, fill='toself',
-                                        name='Rata-rata Nasional', line_color='#475569',
+                                        name='Rata-rata Nasional', line_color='#94a3b8',
                                         line_dash='dash'))
     fig_radar.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
-                   angularaxis=dict(gridcolor='#334155', color='#94a3b8', tickfont=dict(size=13)),
-                   bgcolor='rgba(15,23,42,0.6)'),
-        paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
-        title=f'Radar 4 Aspek - {cluster_sel} vs Nasional',
-        height=480, legend=dict(font=dict(color='#ccc')))
+        polar=dict(radialaxis=dict(visible=True, range=[0,1]),
+                   angularaxis=dict(tickfont=dict(size=13))),
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#6366f1'),
+        title=f'Radar 4 Aspek - {cluster_sel} vs Nasional', height=480)
     st.plotly_chart(fig_radar, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -706,9 +689,7 @@ elif page == "Karakteristik Klaster":
             row[f'Skor {aspek_name}'] = round(np.mean(scores), 3)
         rows.append(row)
     summary_df = pd.DataFrame(rows).set_index('Klaster')
-    skor_cols = [f'Skor {a}' for a in ASPEK.keys()]
-    st.dataframe(summary_df.style.format(precision=3),
-                 use_container_width=True)
+    st.dataframe(summary_df.style.format(precision=3), use_container_width=True)
 
     st.markdown("### Perbandingan Skor Aspek Antar Klaster")
     fig_asp = go.Figure()
@@ -722,5 +703,5 @@ elif page == "Karakteristik Klaster":
         ))
     fig_asp.update_layout(barmode='group', **PLOT_THEME, margin=PLOT_MARGIN, height=420,
                           title='Skor 4 Aspek per Klaster (Normalisasi 0-1)',
-                          legend=dict(font=dict(color='#ccc')), yaxis_title='Skor (0-1)')
+                          yaxis_title='Skor (0-1)')
     st.plotly_chart(fig_asp, use_container_width=True)
