@@ -294,7 +294,7 @@ if page == "Beranda":
     st.markdown('<div class="card"><h3>Preview Dataset</h3>', unsafe_allow_html=True)
     prev = df[['PROVINSI','IKP','Cluster_Label','akses sanitasi layak','akses air minum layak','harga beras']].copy()
     prev.columns = ['Provinsi','IKP','Klaster','Sanitasi (%)','Air Minum (%)','Harga Beras']
-    st.dataframe(prev.style.background_gradient(subset=['IKP'], cmap='Blues'), use_container_width=True)
+    st.dataframe(prev.style.format({'IKP': '{:.3f}'}), use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ════ EKSPLORASI DATA ════
@@ -330,7 +330,7 @@ elif page == "Eksplorasi Data":
         fig = px.imshow(corr, text_auto='.2f', color_continuous_scale='RdBu_r',
                         zmin=-1, zmax=1, title='Heatmap Korelasi Antar Variabel', height=550)
         fig.update_layout(**PLOT_THEME)
-        fig.update_xaxes(tickangle=-30, tickfont_size=10)
+        fig.update_xaxes(tickangle=-30, tickfont=dict(size=10))
         st.plotly_chart(fig, use_container_width=True)
         high_corr = []
         for i in range(len(corr.columns)):
@@ -352,7 +352,7 @@ elif page == "Eksplorasi Data":
         fig = go.Figure(go.Bar(x=df_s['PROVINSI'], y=df_s[sort_by],
                                marker=dict(color=df_s[sort_by], colorscale='Plasma'),
                                text=[f"{v:.2f}" for v in df_s[sort_by]],
-                               textposition='outside', textfont_color='white'))
+                               textposition='outside', textfont=dict(color='white')))
         fig.update_layout(title=f'Top {top_n} - {FEATURE_LABELS.get(sort_by)}',
                           xaxis_tickangle=-40, **PLOT_THEME, height=430)
         st.plotly_chart(fig, use_container_width=True)
@@ -413,7 +413,7 @@ elif page == "Klasterisasi DBSCAN":
                                   y=pca.explained_variance_ratio_*100,
                                   marker_color=['#818cf8','#a78bfa','#c4b5fd'],
                                   text=[f'{v:.1f}%' for v in pca.explained_variance_ratio_*100],
-                                  textposition='outside', textfont_color='white'))
+                                  textposition='outside', textfont=dict(color='white')))
         fig_p.update_layout(**PLOT_THEME, height=300, title='Variance per Komponen PCA')
         st.plotly_chart(fig_p, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -520,7 +520,7 @@ elif page == "Analisis Gabungan":
     with tab1:
         summary = df.groupby('Cluster_Label')[FEATURE_COLS].mean().round(2)
         summary.columns = [FEATURE_LABELS.get(c,c) for c in FEATURE_COLS]
-        st.dataframe(summary.style.background_gradient(cmap='Blues', axis=0), use_container_width=True)
+        st.dataframe(summary.style.format(precision=2), use_container_width=True)
         feat_cmp = st.multiselect("Pilih variabel untuk dibandingkan", FEATURE_COLS,
                                   default=['IKP','akses sanitasi layak','akses air minum layak'],
                                   format_func=lambda x: FEATURE_LABELS.get(x,x))
@@ -563,14 +563,14 @@ elif page == "Analisis Gabungan":
         fig = go.Figure(go.Bar(x=df_ikp['IKP'], y=df_ikp['PROVINSI'], orientation='h',
                                marker=dict(color=df_ikp['IKP'], colorscale='RdYlGn'),
                                text=[f"{v:.2f}" for v in df_ikp['IKP']],
-                               textposition='outside', textfont_color='white'))
+                               textposition='outside', textfont=dict(color='white')))
         fig.update_layout(**PLOT_THEME, title='Indeks Ketahanan Pangan per Provinsi',
                           height=1000, xaxis_title='IKP Score')
         st.plotly_chart(fig, use_container_width=True)
         ikp_cl = df.groupby('Cluster_Label')['IKP'].agg(['mean','min','max','count'])
         ikp_cl.columns = ['Rata-rata IKP','Min IKP','Max IKP','Jumlah Provinsi']
         st.dataframe(ikp_cl.sort_values('Rata-rata IKP', ascending=False)
-                     .style.background_gradient(subset=['Rata-rata IKP'], cmap='Greens'),
+                     .style.format(precision=3),
                      use_container_width=True)
 
 # ════ KARAKTERISTIK KLASTER (4 ASPEK) ════
@@ -644,11 +644,11 @@ elif page == "Karakteristik Klaster":
                     y=[c_val, g_val],
                     marker_color=[clr_a, '#475569'],
                     text=[f'{c_val:,.1f}', f'{g_val:,.1f}'],
-                    textposition='outside', textfont_color='white', textfont_size=10,
+                    textposition='outside', textfont=dict(color='white', size=10),
                 ))
                 fig_mini.update_layout(**PLOT_THEME, height=180, margin=dict(t=10,b=10,l=5,r=5),
                                        showlegend=False, yaxis=dict(visible=False),
-                                       xaxis=dict(tickfont_size=9))
+                                       xaxis=dict(tickfont=dict(size=9)))
                 st.plotly_chart(fig_mini, use_container_width=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -684,7 +684,7 @@ elif page == "Karakteristik Klaster":
                                         line_dash='dash'))
     fig_radar.update_layout(
         polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
-                   angularaxis=dict(gridcolor='#334155', color='#94a3b8', tickfont_size=13),
+                   angularaxis=dict(gridcolor='#334155', color='#94a3b8', tickfont=dict(size=13)),
                    bgcolor='rgba(15,23,42,0.6)'),
         paper_bgcolor='rgba(15,23,42,0)', font_color='#e2e8f0',
         title=f'Radar 4 Aspek - {cluster_sel} vs Nasional',
@@ -706,8 +706,7 @@ elif page == "Karakteristik Klaster":
         rows.append(row)
     summary_df = pd.DataFrame(rows).set_index('Klaster')
     skor_cols = [f'Skor {a}' for a in ASPEK.keys()]
-    st.dataframe(summary_df.style.background_gradient(subset=skor_cols, cmap='RdYlGn', axis=None)
-                                  .background_gradient(subset=['IKP Rata-rata'], cmap='Blues'),
+    st.dataframe(summary_df.style.format(precision=3),
                  use_container_width=True)
 
     st.markdown("### Perbandingan Skor Aspek Antar Klaster")
