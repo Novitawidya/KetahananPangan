@@ -309,7 +309,7 @@ if page == "Beranda":
                 </div>
             </div>
             <p style="color:#bfdbfe;margin:0;font-size:1rem;">
-                Klasterisasi 38 Provinsi · DBSCAN + t-SNE · Mata Kuliah Pembelajaran Mesin
+                Klasterisasi 38 Provinsi · DBSCAN + t-SNE 
             </p>
         </div>
     </div>""", unsafe_allow_html=True)
