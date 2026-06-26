@@ -77,15 +77,48 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 
 @st.cache_data
 def load_data():
-    data_dir = os.path.join(BASE, 'data')
-    path = os.path.join(data_dir, 'ketahanan pangan 2025.xlx')
-    if not os.path.exists(path):
-        # Fallback: cari file Excel apapun di folder data/
-        candidates = [f for f in os.listdir(data_dir) if f.endswith(('.xlsx', '.xls', '.xlx'))]
-        if not candidates:
-            st.error(f"❌ Tidak ada file Excel di folder `{data_dir}`. Silakan upload ulang file data.")
-            st.stop()
-        path = os.path.join(data_dir, candidates[0])
+    # Cari file Excel dari berbagai kemungkinan lokasi
+    search_dirs = [
+        os.path.join(BASE, 'data'),   # ./data/
+        BASE,                          # root repo
+        os.path.join(BASE, '..'),      # parent folder
+        '/mount/src',                  # Streamlit Cloud mount root
+    ]
+
+    candidates = []
+    for d in search_dirs:
+        if os.path.exists(d):
+            for f in os.listdir(d):
+                if f.lower().endswith(('.xlsx', '.xls')) and not f.startswith('~'):
+                    candidates.append(os.path.join(d, f))
+
+    if not candidates:
+        # Tampilkan info debug yang membantu
+        st.error("❌ File Excel tidak ditemukan!")
+        st.markdown("**Debug info:**")
+        st.code(f"BASE path: {BASE}\nSearched dirs: {search_dirs}")
+        for d in search_dirs:
+            if os.path.exists(d):
+                try:
+                    contents = os.listdir(d)
+                    st.code(f"{d}:\n" + "\n".join(contents[:20]))
+                except Exception as e:
+                    st.code(f"{d}: ERROR - {e}")
+        st.markdown("""
+**Solusi:** Pastikan file Excel sudah di-upload ke folder `data/` di dalam repository GitHub kamu.
+
+Struktur yang benar:
+```
+repo/
+├── app.py
+├── requirements.txt
+└── data/
+    └── nama_file_kamu.xlsx
+```
+        """)
+        st.stop()
+
+    path = candidates[0]
     try:
         df = pd.read_excel(path, sheet_name='Sheet1')
     except Exception:
@@ -112,7 +145,6 @@ FEATURE_LABELS = {
     'Kecepatan angin pada ketinggian 2 meter (m/s)': 'Kecepatan Angin / X8 (m/s)',
 }
 
-# Mapping 4 Aspek Ketahanan Pangan
 ASPEK = {
     'Ketersediaan': {
         'cols': ['Produksi Padi', 'produksi jagung'],
@@ -195,7 +227,7 @@ else:
     db_score  = None
 
 @st.cache_data
-def run_tsne(key, perplexity, n_iter):
+def run_tsne(data_hash, perplexity, n_iter):
     return TSNE(n_components=2, perplexity=perplexity, max_iter=n_iter,
                 random_state=42, init='pca').fit_transform(X_scaled)
 
@@ -213,7 +245,6 @@ for i, lbl in enumerate(unique_labels):
     key = 'Noise (-1)' if lbl == -1 else f'Klaster {lbl+1}'
     color_map[key] = '#64748b' if lbl == -1 else PALETTE[i % len(PALETTE)]
 
-# helper: level teks berdasarkan persentil global
 def level_label(val, col, thresholds=(33, 66)):
     arr = df[col].dropna()
     p33, p66 = np.percentile(arr, thresholds[0]), np.percentile(arr, thresholds[1])
@@ -455,21 +486,23 @@ elif page == "Visualisasi t-SNE":
         st.plotly_chart(fig, use_container_width=True)
 
     with tab3:
-        st.markdown('<div class="card"><h3>Cara Kerja t-SNE</h3>', unsafe_allow_html=True)
-        st.markdown(f"""
-**t-SNE** mengubah data 9 dimensi menjadi representasi 2D yang dapat divisualisasikan.
+        st.markdown('<div class="card"><h3>Apa itu t-SNE?</h3>', unsafe_allow_html=True)
+        st.markdown("""
+**t-SNE (t-Distributed Stochastic Neighbor Embedding)** adalah teknik reduksi dimensi non-linear
+yang sangat efektif untuk memvisualisasikan data berdimensi tinggi dalam 2D atau 3D.
 
-**Prinsip kerja:**
-1. Hitung kemiripan antar data di ruang 9 dimensi (distribusi Gaussian)
-2. Petakan ke 2D dengan mempertahankan struktur kemiripan lokal
-3. Optimasi dengan gradient descent untuk minimasi KL divergence
+**Cara Kerja:**
+1. Menghitung kemiripan antar titik data di dimensi tinggi
+2. Memetakan ke dimensi rendah dengan mempertahankan struktur lokal
+3. Mengoptimalkan posisi agar kemiripan di dimensi rendah mirip dimensi tinggi
 
-**Parameter aktif:**
-- Perplexity = `{perplexity_val}` (lokal vs global; rekomendasi 5-30)
-- Max Iterasi = `{tsne_iter}` (lebih banyak = lebih stabil)
+**Parameter Penting:**
+- **Perplexity** – jumlah tetangga efektif yang dipertimbangkan (5–50)
+- **Max Iterasi** – lebih banyak iterasi = lebih stabil, tapi lebih lambat
 
 **Interpretasi:**
-- Titik berdekatan = provinsi dengan profil ketahanan pangan serupa
+- Titik berdekatan = profil ketahanan pangan mirip
+- Klaster terpisah = kelompok provinsi dengan karakteristik berbeda
 - Titik berjauhan = profil berbeda signifikan
 - Jarak ANTAR klaster di t-SNE tidak bermakna langsung
         """)
@@ -547,7 +580,6 @@ elif page == "Karakteristik Klaster":
         <p>Analisis 4 Aspek Ketahanan Pangan: Ketersediaan, Aksesibilitas, Pemanfaatan, Stabilitas</p>
     </div>""", unsafe_allow_html=True)
 
-    # Pilih klaster
     all_clusters = sorted(df['Cluster_Label'].unique())
     cluster_sel = st.selectbox("Pilih Klaster untuk Dianalisis", all_clusters)
     sub = df[df['Cluster_Label'] == cluster_sel]
@@ -562,10 +594,7 @@ elif page == "Karakteristik Klaster":
     </div>
     """, unsafe_allow_html=True)
 
-    # ── 4 Aspek Cards ──
     st.markdown("### Profil 4 Aspek Ketahanan Pangan")
-
-    global_mean = df[FEATURE_COLS[1:]].mean()  # rata-rata nasional (tanpa IKP)
 
     for aspek_name, aspek_info in ASPEK.items():
         cols_aspek = aspek_info['cols']
@@ -573,7 +602,6 @@ elif page == "Karakteristik Klaster":
         bg_a  = aspek_info['bg']
         brd_a = aspek_info['border']
 
-        # nilai rata-rata klaster vs nasional
         cluster_vals = sub[cols_aspek].mean()
         global_vals  = df[cols_aspek].mean()
 
@@ -610,7 +638,6 @@ elif page == "Karakteristik Klaster":
                 """, unsafe_allow_html=True)
 
             with metric_cols[idx*2 + 1]:
-                # Mini bar chart klaster vs nasional
                 fig_mini = go.Figure()
                 fig_mini.add_trace(go.Bar(
                     x=['Klaster ini', 'Rata-rata Nasional'],
@@ -626,7 +653,6 @@ elif page == "Karakteristik Klaster":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Radar 4 Aspek (skor agregat per aspek) ──
     st.markdown("### Radar Chart - Skor 4 Aspek")
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
@@ -634,7 +660,6 @@ elif page == "Karakteristik Klaster":
     norm_aspek_nasional = {}
     for aspek_name, aspek_info in ASPEK.items():
         cols_a = aspek_info['cols']
-        # normalisasi tiap kolom 0-1 lalu rata-rata
         scores = []
         scores_global = []
         for c in cols_a:
@@ -653,8 +678,7 @@ elif page == "Karakteristik Klaster":
 
     fig_radar = go.Figure()
     fig_radar.add_trace(go.Scatterpolar(r=vals_cl, theta=theta, fill='toself',
-                                        name=cluster_sel, line_color=clr,
-                                        fillcolor=clr.replace('#','rgba(').rstrip(')')+'88,0.15)' if False else clr))
+                                        name=cluster_sel, line_color=clr))
     fig_radar.add_trace(go.Scatterpolar(r=vals_nas, theta=theta, fill='toself',
                                         name='Rata-rata Nasional', line_color='#475569',
                                         line_dash='dash'))
@@ -668,7 +692,6 @@ elif page == "Karakteristik Klaster":
     st.plotly_chart(fig_radar, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Tabel ringkasan semua klaster x 4 aspek ──
     st.markdown("### Ringkasan Semua Klaster per Aspek")
     rows = []
     for cl in all_clusters:
@@ -687,7 +710,6 @@ elif page == "Karakteristik Klaster":
                                   .background_gradient(subset=['IKP Rata-rata'], cmap='Blues'),
                  use_container_width=True)
 
-    # ── Bar per aspek semua klaster ──
     st.markdown("### Perbandingan Skor Aspek Antar Klaster")
     fig_asp = go.Figure()
     for i, aspek_name in enumerate(ASPEK.keys()):
