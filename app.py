@@ -22,54 +22,76 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
-.stApp { background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); }
+
+/* Dark mode */
+[data-theme="dark"] .stApp,
+.stApp[data-theme="dark"] {
+    background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+}
+/* Light mode - clean white */
+[data-theme="light"] .stApp,
+.stApp[data-theme="light"] {
+    background: #f8fafc;
+}
+
 .hero {
     background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 50%, #7c3aed 100%);
     border-radius: 24px; padding: 2.8rem 2.5rem; margin-bottom: 1.8rem;
-    box-shadow: 0 0 60px rgba(124,58,237,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 60px rgba(124,58,237,0.25);
+    border: 1px solid rgba(255,255,255,0.15);
 }
-.hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0; color: white; }
-.hero p  { font-size: 1rem; color: #bfdbfe; margin: .6rem 0 0; }
+.hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0; color: white !important; }
+.hero p  { font-size: 1rem; color: #bfdbfe !important; margin: .6rem 0 0; }
+
+/* Card - adapts to theme */
 .card {
-    background: rgba(30,27,75,0.7); border-radius: 20px; padding: 1.6rem;
+    border-radius: 20px; padding: 1.6rem;
     border: 1px solid rgba(124,58,237,0.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4); margin-bottom: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 1rem;
+    background: var(--background-color);
 }
-.card h3 { font-weight: 700; margin: 0 0 1rem; font-size: 1.05rem; color: #a5b4fc; }
+.card h3 { font-weight: 700; margin: 0 0 1rem; font-size: 1.05rem; color: #6d28d9; }
+
+/* Metric box */
 .metric-box {
-    background: linear-gradient(135deg, rgba(30,27,75,0.9), rgba(49,46,129,0.9));
     border-radius: 18px; padding: 1.4rem; text-align: center;
     border: 1px solid rgba(124,58,237,0.3);
+    background: var(--background-color);
 }
-.metric-box .val { font-size: 2rem; font-weight: 800; color: #a5b4fc; }
-.metric-box .lbl { font-size: .72rem; color: #94a3b8; font-weight: 600;
-                   text-transform: uppercase; letter-spacing: 1.2px; margin-top: .4rem; }
+.metric-box .val { font-size: 2rem; font-weight: 800; color: #6d28d9; }
+.metric-box .lbl { font-size: .72rem; color: var(--text-color); opacity: 0.6;
+                   font-weight: 600; text-transform: uppercase;
+                   letter-spacing: 1.2px; margin-top: .4rem; }
+
 .aspek-card {
     border-radius: 16px; padding: 1.2rem 1.4rem; margin-bottom: .8rem;
     border-left: 5px solid; font-size: .95rem;
 }
 .aspek-title { font-weight: 800; font-size: 1rem; margin-bottom: .4rem; }
 .aspek-val   { font-size: 1.5rem; font-weight: 700; }
-.aspek-desc  { font-size: .82rem; color: #cbd5e1; margin-top: .3rem; }
+
+/* Sidebar */
 div[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%) !important;
+    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%) !important;
 }
 div[data-testid="stSidebar"] p,
 div[data-testid="stSidebar"] span,
-div[data-testid="stSidebar"] label { color: #c7d2fe !important; }
+div[data-testid="stSidebar"] label { color: #e0e7ff !important; }
 div[data-testid="stSidebar"] h2,
 div[data-testid="stSidebar"] h3 { color: #a5b4fc !important; }
+div[data-testid="stSidebar"] .stSlider label { color: #c7d2fe !important; }
+
+/* Button */
 div[data-testid="stButton"] > button {
     background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
     color: white !important; border: none !important;
     border-radius: 14px !important; font-weight: 700 !important;
     width: 100% !important;
 }
-p, span, li { color: #e2e8f0 !important; }
-h1, h2, h3, h4 { color: #f1f5f9 !important; }
-.stTabs [data-baseweb="tab"] { color: #94a3b8 !important; }
-.stTabs [aria-selected="true"] { color: #a5b4fc !important; border-bottom-color: #a5b4fc !important; }
+
+/* Tabs */
+.stTabs [data-baseweb="tab"] { color: #6d28d9 !important; }
+.stTabs [aria-selected="true"] { color: #4f46e5 !important; border-bottom-color: #4f46e5 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,8 +204,8 @@ ASPEK = {
 
 PALETTE = ['#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa','#fbbf24','#f87171','#22d3ee']
 PLOT_THEME = dict(
-    plot_bgcolor='rgba(15,23,42,0.8)', paper_bgcolor='rgba(15,23,42,0)',
-    font=dict(color='#e2e8f0')
+    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(color=None)  # None = plotly auto-detects (dark/light)
 )
 PLOT_MARGIN = dict(t=40, b=20, l=20, r=20)
 
@@ -289,7 +311,7 @@ if page == "Beranda":
                          color_discrete_map=color_map, hover_name='PROVINSI',
                          title='Peta t-SNE - Klaster DBSCAN')
         fig.update_traces(marker=dict(size=12, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=380, legend=dict(font=dict(color='#ccc')))
+        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=380, legend=dict())
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="card"><h3>Preview Dataset</h3>', unsafe_allow_html=True)
@@ -384,7 +406,7 @@ elif page == "Klasterisasi DBSCAN":
                          hover_name='PROVINSI',
                          title=f'DBSCAN - {FEATURE_LABELS.get(x_ax)} vs {FEATURE_LABELS.get(y_ax)}')
         fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=480, legend=dict(font=dict(color='#ccc')))
+        fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=480, legend=dict())
         st.plotly_chart(fig, use_container_width=True)
 
         fig2 = px.scatter(df, x='PCA_1', y='PCA_2', color='Cluster_Label', color_discrete_map=color_map,
@@ -393,7 +415,7 @@ elif page == "Klasterisasi DBSCAN":
         fig2.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=450,
                            xaxis_title=f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)',
                            yaxis_title=f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)',
-                           legend=dict(font=dict(color='#ccc')))
+                           legend=dict())
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab2:
@@ -402,11 +424,11 @@ elif page == "Klasterisasi DBSCAN":
                              hover_data={'IKP':':.2f'}, title='Visualisasi 3D DBSCAN (PCA)', height=600)
         fig3.update_traces(marker=dict(size=8, line=dict(width=0.5, color='white')))
         fig3.update_layout(**PLOT_THEME, margin=PLOT_MARGIN,
-                           scene=dict(bgcolor='rgba(15,23,42,0.8)',
-                                      xaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                                      yaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                                      zaxis=dict(gridcolor='#334155', color='#94a3b8')),
-                           legend=dict(font=dict(color='#ccc')))
+                           scene=dict(bgcolor='rgba(0,0,0,0)',
+                                      xaxis=dict(gridcolor='rgba(128,128,128,0.3)', color=None),
+                                      yaxis=dict(gridcolor='rgba(128,128,128,0.3)', color=None),
+                                      zaxis=dict(gridcolor='rgba(128,128,128,0.3)', color=None)),
+                           legend=dict())
         st.plotly_chart(fig3, use_container_width=True)
 
         st.markdown('<div class="card"><h3>Explained Variance PCA</h3>', unsafe_allow_html=True)
@@ -454,7 +476,7 @@ elif page == "Visualisasi t-SNE":
                              title=f't-SNE 2D - DBSCAN (perplexity={perplexity_val})', text='PROVINSI')
             fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')),
                               textposition='top center', textfont=dict(size=8, color='white'))
-            fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=550, legend=dict(font=dict(color='#ccc')))
+            fig.update_layout(**PLOT_THEME, margin=PLOT_MARGIN, height=550, legend=dict())
             st.plotly_chart(fig, use_container_width=True)
         with c2:
             st.markdown('<div class="card"><h3>Legenda Klaster</h3>', unsafe_allow_html=True)
@@ -466,8 +488,8 @@ elif page == "Visualisasi t-SNE":
                     f'<div style="background:{clr}22;border-left:4px solid {clr};'
                     f'padding:.8rem;border-radius:8px;margin:.5rem 0;">'
                     f'<b style="color:{clr}">{lbl}</b><br>'
-                    f'<small style="color:#94a3b8">{len(members)} provinsi</small><br>'
-                    f'<small style="color:#cbd5e1">{", ".join(members[:5])}{"..." if len(members)>5 else ""}</small>'
+                    f'<small style="color:var(--text-color);opacity:0.6">{len(members)} provinsi</small><br>'
+                    f'<small style="color:var(--text-color);opacity:0.8">{", ".join(members[:5])}{"..." if len(members)>5 else ""}</small>'
                     f'</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             if sil_score:
@@ -533,7 +555,7 @@ elif page == "Analisis Gabungan":
                                      y=means_df.loc[cl].values,
                                      marker_color=color_map.get(cl, PALETTE[i%len(PALETTE)])))
             fig.update_layout(barmode='group', title='Perbandingan Variabel Antar Klaster',
-                              **PLOT_THEME, margin=PLOT_MARGIN, height=450, xaxis_tickangle=-20, legend=dict(font=dict(color='#ccc')))
+                              **PLOT_THEME, margin=PLOT_MARGIN, height=450, xaxis_tickangle=-20, legend=dict())
             st.plotly_chart(fig, use_container_width=True)
 
     with tab2:
@@ -552,11 +574,11 @@ elif page == "Analisis Gabungan":
             fig_r.add_trace(go.Scatterpolar(r=vals, theta=categories+[categories[0]],
                                              fill='toself', name=cl, line_color=clr))
         fig_r.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
-                       angularaxis=dict(gridcolor='#334155', color='#94a3b8'),
-                       bgcolor='rgba(15,23,42,0.6)'),
-            paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
-            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550, legend=dict(font=dict(color='#ccc')))
+            polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='rgba(128,128,128,0.3)', color=None),
+                       angularaxis=dict(gridcolor='rgba(128,128,128,0.3)', color=None),
+                       bgcolor='rgba(0,0,0,0)'),
+            paper_bgcolor='rgba(0,0,0,0)', font=dict(color=None),
+            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550, legend=dict())
         st.plotly_chart(fig_r, use_container_width=True)
 
     with tab3:
@@ -590,8 +612,8 @@ elif page == "Karakteristik Klaster":
     <div style="background:{clr}18;border:2px solid {clr};border-radius:16px;
                 padding:1.2rem 1.6rem;margin-bottom:1.5rem;">
         <b style="color:{clr};font-size:1.2rem">{cluster_sel}</b>
-        <span style="color:#94a3b8;margin-left:1rem">{len(sub)} Provinsi</span><br>
-        <small style="color:#cbd5e1">{' · '.join(sub['PROVINSI'].tolist())}</small>
+        <span style="color:var(--text-color);opacity:0.6;margin-left:1rem">{len(sub)} Provinsi</span><br>
+        <small style="color:var(--text-color);opacity:0.8">{' · '.join(sub['PROVINSI'].tolist())}</small>
     </div>
     """, unsafe_allow_html=True)
 
@@ -609,7 +631,7 @@ elif page == "Karakteristik Klaster":
         st.markdown(f"""
         <div class="aspek-card" style="background:{bg_a};border-left-color:{brd_a};">
             <div class="aspek-title" style="color:{clr_a}">
-                {aspek_name} &nbsp;<small style="font-weight:400;color:#94a3b8">({aspek_info['icon']}) — {aspek_info['desc']}</small>
+                {aspek_name} &nbsp;<small style="font-weight:400;color:var(--text-color);opacity:0.6">({aspek_info['icon']}) — {aspek_info['desc']}</small>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -627,7 +649,7 @@ elif page == "Karakteristik Klaster":
             with metric_cols[idx*2]:
                 st.markdown(f"""
                 <div class="metric-box" style="border-color:{clr_a}44;">
-                    <div style="font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px">
+                    <div style="font-size:.72rem;color:var(--text-color);opacity:0.6;text-transform:uppercase;letter-spacing:1px">
                         {FEATURE_LABELS.get(col_name, col_name)}
                     </div>
                     <div class="val" style="color:{clr_a};margin:.4rem 0">{c_val:,.2f}</div>
@@ -684,12 +706,12 @@ elif page == "Karakteristik Klaster":
                                         name='Rata-rata Nasional', line_color='#475569',
                                         line_dash='dash'))
     fig_radar.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
-                   angularaxis=dict(gridcolor='#334155', color='#94a3b8', tickfont=dict(size=13)),
-                   bgcolor='rgba(15,23,42,0.6)'),
-        paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
+        polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='rgba(128,128,128,0.3)', color=None),
+                   angularaxis=dict(gridcolor='rgba(128,128,128,0.3)', color=None, tickfont=dict(size=13)),
+                   bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', font=dict(color=None),
         title=f'Radar 4 Aspek - {cluster_sel} vs Nasional',
-        height=480, legend=dict(font=dict(color='#ccc')))
+        height=480, legend=dict())
     st.plotly_chart(fig_radar, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -722,5 +744,5 @@ elif page == "Karakteristik Klaster":
         ))
     fig_asp.update_layout(barmode='group', **PLOT_THEME, margin=PLOT_MARGIN, height=420,
                           title='Skor 4 Aspek per Klaster (Normalisasi 0-1)',
-                          legend=dict(font=dict(color='#ccc')), yaxis_title='Skor (0-1)')
+                          legend=dict(), yaxis_title='Skor (0-1)')
     st.plotly_chart(fig_asp, use_container_width=True)
