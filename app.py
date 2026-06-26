@@ -12,7 +12,7 @@ import warnings, os
 warnings.filterwarnings("ignore")
 
 st.set_page_config(
-    page_title="SatDat - Analisis Ketahanan Pangan",
+    page_title="Dashboard Ketahanan Pangan Indonesia 2025",
     page_icon="🌾",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -210,7 +210,23 @@ PLOT_THEME = dict(
 PLOT_MARGIN = dict(t=40, b=20, l=20, r=20)
 
 with st.sidebar:
-    st.markdown("## SatDat Dashboard")
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 100%);
+        border-radius: 18px; padding: 1.4rem 1.2rem; margin-bottom: 0.8rem;
+        box-shadow: 0 4px 20px rgba(21,128,61,0.4);
+        border: 1px solid rgba(255,255,255,0.15);
+        text-align: center;
+    ">
+        <div style="font-size:2.8rem; line-height:1; margin-bottom:0.4rem;">🌾</div>
+        <div style="font-size:1.05rem; font-weight:800; color:white; letter-spacing:0.5px;">
+            Ketahanan Pangan
+        </div>
+        <div style="font-size:0.75rem; color:#bbf7d0; font-weight:600; margin-top:0.2rem;">
+            Indonesia 2025
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
     page = st.radio("Menu", [
         "Beranda", "Eksplorasi Data",
@@ -277,35 +293,74 @@ def level_label(val, col, thresholds=(33, 66)):
 
 # ════ BERANDA ════
 if page == "Beranda":
-    st.markdown("""<div class="hero">
-        <h1>Analisis Ketahanan Pangan Indonesia</h1>
-        <p>Klasterisasi 38 Provinsi menggunakan DBSCAN dan Visualisasi t-SNE</p>
+    st.markdown("""
+    <div class="hero" style="position:relative; overflow:hidden;">
+        <div style="position:absolute;top:-10px;right:20px;font-size:7rem;opacity:0.12;transform:rotate(-15deg);line-height:1;">🌾</div>
+        <div style="position:absolute;bottom:-15px;right:120px;font-size:5rem;opacity:0.08;transform:rotate(10deg);line-height:1;">🌿</div>
+        <div style="position:absolute;top:10px;left:-10px;font-size:4rem;opacity:0.07;transform:rotate(-20deg);line-height:1;">🌱</div>
+        <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.7rem;">
+                <span style="font-size:2.8rem;">🌾</span>
+                <div>
+                    <div style="font-size:0.72rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Dashboard</div>
+                    <h1 style="font-size:2.2rem;font-weight:800;margin:0;color:white;line-height:1.1;">
+                        Ketahanan Pangan Indonesia 2025
+                    </h1>
+                </div>
+            </div>
+            <p style="color:#bfdbfe;margin:0;font-size:1rem;">
+                Klasterisasi 38 Provinsi · DBSCAN + t-SNE · Mata Kuliah Pembelajaran Mesin
+            </p>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     c1,c2,c3,c4 = st.columns(4)
-    for col,(val,lbl) in zip([c1,c2,c3,c4],[
-        (str(len(df)),"Jumlah Provinsi"),(str(n_clusters),"Klaster Ditemukan"),
-        (str(n_noise),"Titik Noise"),(f"{sil_score:.3f}" if sil_score else "N/A","Silhouette Score")
+    for col,(icon,val,lbl) in zip([c1,c2,c3,c4],[
+        ("🗺️", str(len(df)),"Jumlah Provinsi"),
+        ("🔵", str(n_clusters),"Klaster Ditemukan"),
+        ("⚪", str(n_noise),"Titik Noise"),
+        ("📈", f"{sil_score:.3f}" if sil_score else "N/A","Silhouette Score")
     ]):
-        col.markdown(f'<div class="metric-box"><div class="val">{val}</div><div class="lbl">{lbl}</div></div>',
-                     unsafe_allow_html=True)
+        col.markdown(f'''<div class="metric-box">
+            <div style="font-size:1.6rem;margin-bottom:0.2rem;">{icon}</div>
+            <div class="val">{val}</div>
+            <div class="lbl">{lbl}</div>
+        </div>''', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     ca, cb = st.columns(2)
     with ca:
-        st.markdown('<div class="card"><h3>Tentang Proyek</h3>', unsafe_allow_html=True)
         st.markdown("""
-**Tujuan:** Mengidentifikasi pola kemiripan antar provinsi berdasarkan 4 aspek ketahanan pangan.
-
-**4 Aspek Ketahanan Pangan:**
-- **Ketersediaan** (X1, X2) - Produksi Padi & Jagung
-- **Aksesibilitas** (X3, X4) - Pendapatan Per Kapita & Harga Beras
-- **Pemanfaatan** (X5, X6) - Akses Sanitasi & Air Minum
-- **Stabilitas** (X7, X8) - Curah Hujan & Kecepatan Angin
-
-**Metode:** DBSCAN + t-SNE
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="card">
+            <h3>🌾 Tentang Dashboard</h3>
+            <p style="font-size:0.9rem;">Mengidentifikasi pola kemiripan antar provinsi berdasarkan <strong>4 aspek ketahanan pangan</strong> menggunakan metode machine learning.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.8rem;">
+                <div style="background:rgba(52,211,153,0.1);border-radius:10px;padding:0.7rem;border-left:3px solid #34d399;">
+                    <div style="font-size:1.2rem;">🌾</div>
+                    <div style="font-weight:700;font-size:0.8rem;color:#34d399;">Ketersediaan</div>
+                    <div style="font-size:0.72rem;opacity:0.8;">Produksi Padi & Jagung</div>
+                </div>
+                <div style="background:rgba(96,165,250,0.1);border-radius:10px;padding:0.7rem;border-left:3px solid #60a5fa;">
+                    <div style="font-size:1.2rem;">💰</div>
+                    <div style="font-weight:700;font-size:0.8rem;color:#60a5fa;">Aksesibilitas</div>
+                    <div style="font-size:0.72rem;opacity:0.8;">PDRB & Harga Beras</div>
+                </div>
+                <div style="background:rgba(244,114,182,0.1);border-radius:10px;padding:0.7rem;border-left:3px solid #f472b6;">
+                    <div style="font-size:1.2rem;">🚰</div>
+                    <div style="font-weight:700;font-size:0.8rem;color:#f472b6;">Pemanfaatan</div>
+                    <div style="font-size:0.72rem;opacity:0.8;">Sanitasi & Air Minum</div>
+                </div>
+                <div style="background:rgba(251,146,60,0.1);border-radius:10px;padding:0.7rem;border-left:3px solid #fb923c;">
+                    <div style="font-size:1.2rem;">🌧️</div>
+                    <div style="font-weight:700;font-size:0.8rem;color:#fb923c;">Stabilitas</div>
+                    <div style="font-size:0.72rem;opacity:0.8;">Curah Hujan & Angin</div>
+                </div>
+            </div>
+            <div style="margin-top:0.8rem;padding:0.6rem;background:rgba(99,102,241,0.1);border-radius:8px;text-align:center;font-size:0.78rem;font-weight:600;color:#818cf8;">
+                🤖 Metode: DBSCAN + t-SNE &nbsp;·&nbsp; 38 Provinsi Indonesia
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     with cb:
         fig = px.scatter(df, x='TSNE_1', y='TSNE_2', color='Cluster_Label',
                          color_discrete_map=color_map, hover_name='PROVINSI',
@@ -322,9 +377,17 @@ if page == "Beranda":
 
 # ════ EKSPLORASI DATA ════
 elif page == "Eksplorasi Data":
-    st.markdown("""<div class="hero">
-        <h1>Eksplorasi Data</h1>
-        <p>Distribusi dan korelasi variabel ketahanan pangan 38 provinsi</p>
+    st.markdown("""
+    <div class="hero" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-5px;right:20px;font-size:6rem;opacity:0.1;transform:rotate(-10deg)">📊</div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:2.4rem;">📊</span>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Ketahanan Pangan Indonesia 2025</div>
+                <h1 style="margin:0;color:white;font-size:2rem;">Eksplorasi Data</h1>
+                <p style="color:#bfdbfe;margin:0.3rem 0 0;font-size:0.9rem;">Distribusi dan korelasi variabel ketahanan pangan 38 provinsi</p>
+            </div>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     tab1, tab2, tab3 = st.tabs(["Distribusi Variabel", "Heatmap Korelasi", "Ranking Provinsi"])
@@ -382,9 +445,17 @@ elif page == "Eksplorasi Data":
 
 # ════ KLASTERISASI DBSCAN ════
 elif page == "Klasterisasi DBSCAN":
-    st.markdown("""<div class="hero">
-        <h1>Klasterisasi DBSCAN</h1>
-        <p>Density-Based Spatial Clustering - Menemukan kelompok alami tanpa asumsi jumlah klaster</p>
+    st.markdown("""
+    <div class="hero" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-5px;right:20px;font-size:6rem;opacity:0.1;transform:rotate(-10deg)">🔵</div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:2.4rem;">🔵</span>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Ketahanan Pangan Indonesia 2025</div>
+                <h1 style="margin:0;color:white;font-size:2rem;">Klasterisasi DBSCAN</h1>
+                <p style="color:#bfdbfe;margin:0.3rem 0 0;font-size:0.9rem;">Density-Based Spatial Clustering · Menemukan kelompok alami tanpa asumsi jumlah klaster</p>
+            </div>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     c1,c2,c3,c4 = st.columns(4)
@@ -460,9 +531,17 @@ elif page == "Klasterisasi DBSCAN":
 
 # ════ VISUALISASI t-SNE ════
 elif page == "Visualisasi t-SNE":
-    st.markdown("""<div class="hero">
-        <h1>Visualisasi t-SNE</h1>
-        <p>Reduksi dimensi untuk memetakan kemiripan antar provinsi dalam ruang 2D</p>
+    st.markdown("""
+    <div class="hero" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-5px;right:20px;font-size:6rem;opacity:0.1;transform:rotate(-10deg)">🎯</div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:2.4rem;">🎯</span>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Ketahanan Pangan Indonesia 2025</div>
+                <h1 style="margin:0;color:white;font-size:2rem;">Visualisasi t-SNE</h1>
+                <p style="color:#bfdbfe;margin:0.3rem 0 0;font-size:0.9rem;">Reduksi dimensi untuk memetakan kemiripan antar provinsi dalam ruang 2D</p>
+            </div>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     tab1, tab2, tab3 = st.tabs(["t-SNE 2D", "Warna Variabel", "Penjelasan t-SNE"])
@@ -533,9 +612,17 @@ yang sangat efektif untuk memvisualisasikan data berdimensi tinggi dalam 2D atau
 
 # ════ ANALISIS GABUNGAN ════
 elif page == "Analisis Gabungan":
-    st.markdown("""<div class="hero">
-        <h1>Analisis Gabungan t-SNE + DBSCAN</h1>
-        <p>Insight mendalam tentang pola ketahanan pangan antar klaster provinsi</p>
+    st.markdown("""
+    <div class="hero" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-5px;right:20px;font-size:6rem;opacity:0.1;transform:rotate(-10deg)">🔬</div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:2.4rem;">🔬</span>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Ketahanan Pangan Indonesia 2025</div>
+                <h1 style="margin:0;color:white;font-size:2rem;">Analisis Gabungan t-SNE + DBSCAN</h1>
+                <p style="color:#bfdbfe;margin:0.3rem 0 0;font-size:0.9rem;">Insight mendalam tentang pola ketahanan pangan antar klaster provinsi</p>
+            </div>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     tab1, tab2, tab3 = st.tabs(["Profil Klaster", "Radar Chart", "Sebaran IKP"])
@@ -598,9 +685,17 @@ elif page == "Analisis Gabungan":
 
 # ════ KARAKTERISTIK KLASTER (4 ASPEK) ════
 elif page == "Karakteristik Klaster":
-    st.markdown("""<div class="hero">
-        <h1>Karakteristik Klaster</h1>
-        <p>Analisis 4 Aspek Ketahanan Pangan: Ketersediaan, Aksesibilitas, Pemanfaatan, Stabilitas</p>
+    st.markdown("""
+    <div class="hero" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-5px;right:20px;font-size:6rem;opacity:0.1;transform:rotate(-10deg)">📌</div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:2.4rem;">📌</span>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#bfdbfe;text-transform:uppercase;letter-spacing:2px;">Ketahanan Pangan Indonesia 2025</div>
+                <h1 style="margin:0;color:white;font-size:2rem;">Karakteristik Klaster</h1>
+                <p style="color:#bfdbfe;margin:0.3rem 0 0;font-size:0.9rem;">Analisis 4 Aspek: Ketersediaan · Aksesibilitas · Pemanfaatan · Stabilitas</p>
+            </div>
+        </div>
     </div>""", unsafe_allow_html=True)
 
     all_clusters = sorted(df['Cluster_Label'].unique())
