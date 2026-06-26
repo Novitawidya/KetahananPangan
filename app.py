@@ -183,7 +183,7 @@ ASPEK = {
 PALETTE = ['#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa','#fbbf24','#f87171','#22d3ee']
 PLOT_THEME = dict(
     plot_bgcolor='rgba(15,23,42,0.8)', paper_bgcolor='rgba(15,23,42,0)',
-    font_color='#e2e8f0', margin=dict(t=40, b=20, l=20, r=20)
+    font=dict(color='#e2e8f0'), margin=dict(t=40, b=20, l=20, r=20)
 )
 
 with st.sidebar:
@@ -288,7 +288,7 @@ if page == "Beranda":
                          color_discrete_map=color_map, hover_name='PROVINSI',
                          title='Peta t-SNE - Klaster DBSCAN')
         fig.update_traces(marker=dict(size=12, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, height=380, legend=dict(font_color='#ccc'))
+        fig.update_layout(**PLOT_THEME, height=380, legend=dict(font=dict(color='#ccc')))
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="card"><h3>Preview Dataset</h3>', unsafe_allow_html=True)
@@ -383,7 +383,7 @@ elif page == "Klasterisasi DBSCAN":
                          hover_name='PROVINSI',
                          title=f'DBSCAN - {FEATURE_LABELS.get(x_ax)} vs {FEATURE_LABELS.get(y_ax)}')
         fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')))
-        fig.update_layout(**PLOT_THEME, height=480, legend=dict(font_color='#ccc'))
+        fig.update_layout(**PLOT_THEME, height=480, legend=dict(font=dict(color='#ccc')))
         st.plotly_chart(fig, use_container_width=True)
 
         fig2 = px.scatter(df, x='PCA_1', y='PCA_2', color='Cluster_Label', color_discrete_map=color_map,
@@ -392,7 +392,7 @@ elif page == "Klasterisasi DBSCAN":
         fig2.update_layout(**PLOT_THEME, height=450,
                            xaxis_title=f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)',
                            yaxis_title=f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)',
-                           legend=dict(font_color='#ccc'))
+                           legend=dict(font=dict(color='#ccc')))
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab2:
@@ -405,7 +405,7 @@ elif page == "Klasterisasi DBSCAN":
                                       xaxis=dict(gridcolor='#334155', color='#94a3b8'),
                                       yaxis=dict(gridcolor='#334155', color='#94a3b8'),
                                       zaxis=dict(gridcolor='#334155', color='#94a3b8')),
-                           legend=dict(font_color='#ccc'))
+                           legend=dict(font=dict(color='#ccc')))
         st.plotly_chart(fig3, use_container_width=True)
 
         st.markdown('<div class="card"><h3>Explained Variance PCA</h3>', unsafe_allow_html=True)
@@ -453,7 +453,7 @@ elif page == "Visualisasi t-SNE":
                              title=f't-SNE 2D - DBSCAN (perplexity={perplexity_val})', text='PROVINSI')
             fig.update_traces(marker=dict(size=14, line=dict(width=1.5, color='white')),
                               textposition='top center', textfont=dict(size=8, color='white'))
-            fig.update_layout(**PLOT_THEME, height=550, legend=dict(font_color='#ccc'))
+            fig.update_layout(**PLOT_THEME, height=550, legend=dict(font=dict(color='#ccc')))
             st.plotly_chart(fig, use_container_width=True)
         with c2:
             st.markdown('<div class="card"><h3>Legenda Klaster</h3>', unsafe_allow_html=True)
@@ -532,7 +532,7 @@ elif page == "Analisis Gabungan":
                                      y=means_df.loc[cl].values,
                                      marker_color=color_map.get(cl, PALETTE[i%len(PALETTE)])))
             fig.update_layout(barmode='group', title='Perbandingan Variabel Antar Klaster',
-                              **PLOT_THEME, height=450, xaxis_tickangle=-20, legend=dict(font_color='#ccc'))
+                              **PLOT_THEME, height=450, xaxis_tickangle=-20, legend=dict(font=dict(color='#ccc')))
             st.plotly_chart(fig, use_container_width=True)
 
     with tab2:
@@ -554,8 +554,8 @@ elif page == "Analisis Gabungan":
             polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
                        angularaxis=dict(gridcolor='#334155', color='#94a3b8'),
                        bgcolor='rgba(15,23,42,0.6)'),
-            paper_bgcolor='rgba(15,23,42,0)', font_color='#e2e8f0',
-            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550, legend=dict(font_color='#ccc'))
+            paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
+            title='Radar Chart Profil Klaster (Normalisasi 0-1)', height=550, legend=dict(font=dict(color='#ccc')))
         st.plotly_chart(fig_r, use_container_width=True)
 
     with tab3:
@@ -686,9 +686,9 @@ elif page == "Karakteristik Klaster":
         polar=dict(radialaxis=dict(visible=True, range=[0,1], gridcolor='#334155', color='#94a3b8'),
                    angularaxis=dict(gridcolor='#334155', color='#94a3b8', tickfont=dict(size=13)),
                    bgcolor='rgba(15,23,42,0.6)'),
-        paper_bgcolor='rgba(15,23,42,0)', font_color='#e2e8f0',
+        paper_bgcolor='rgba(15,23,42,0)', font=dict(color='#e2e8f0'),
         title=f'Radar 4 Aspek - {cluster_sel} vs Nasional',
-        height=480, legend=dict(font_color='#ccc'))
+        height=480, legend=dict(font=dict(color='#ccc')))
     st.plotly_chart(fig_radar, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -721,5 +721,5 @@ elif page == "Karakteristik Klaster":
         ))
     fig_asp.update_layout(barmode='group', **PLOT_THEME, height=420,
                           title='Skor 4 Aspek per Klaster (Normalisasi 0-1)',
-                          legend=dict(font_color='#ccc'), yaxis_title='Skor (0-1)')
+                          legend=dict(font=dict(color='#ccc')), yaxis_title='Skor (0-1)')
     st.plotly_chart(fig_asp, use_container_width=True)
